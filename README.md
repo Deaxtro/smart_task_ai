@@ -22,7 +22,7 @@ An AI-powered tool that cleans messy task descriptions using GPT-4 and returns c
 
 ## ✅ To Run Locally
 ```bash
-cd backend && npm install && node server.js
+cd backend && npm install && node server.js //needs .env file with openAI api key to work
 cd frontend && npm install && npm run dev
 ```
 
