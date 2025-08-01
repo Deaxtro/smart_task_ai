@@ -1,0 +1,88 @@
+{
+  "name": "Smart Task Summarizer Flow",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "sheetId": "your-sheet-id",
+        "range": "Tasks!A2:A",
+        "options": {
+          "valueRenderMode": "UNFORMATTED_VALUE",
+          "dataStartRow": 2
+        }
+      },
+      "id": "1",
+      "name": "Google Sheets Trigger",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:5000/summarize",
+        "method": "POST",
+        "responseFormat": "json",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "{ \"tasks\": [ {{$json[\"Task Description\"]}} ] }"
+      },
+      "id": "2",
+      "name": "Summarize via API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "sheetId": "your-sheet-id",
+        "range": "Summarized!A:C",
+        "options": {},
+        "data": [
+          {
+            "values": "={{$json[0].summary}},{{$json[0].tags.join(' ')}},{{$json[0].priority}}"
+          }
+        ]
+      },
+      "id": "3",
+      "name": "Write to Summary Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        750,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Summarize via API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize via API": {
+      "main": [
+        [
+          {
+            "node": "Write to Summary Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
